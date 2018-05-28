@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="travelHistory">
+	
+	<insert id="insertTravelHistory" parameterType="hashmap">
+		insert into travel_history(th_num,th_req_num,th_gui_num,th_scb_num)
+		values(th_seq.nextval,#{th_req_num},#{th_gui_num},#{th_scb_num})
+	</insert>
+	
+	<select id="requestList" parameterType="int" resultType="int">
+		select th_scb_num
+		from travel_history
+		where th_req_num=#{mem_num}
+	</select>
+
+	<select id="guiderList" parameterType="int" resultType="int">
+		select th_scb_num
+		from travel_history
+		where th_gui_num=#{mem_num}
+	</select>
+	
+	<select id="selectRequestNum" parameterType="int" resultType="int">
+		select th_req_num
+		from travel_history
+		where th_scb_num=#{scb_num} 
+	</select>
+	
+	<select id="selectGuiderNum" parameterType="int" resultType="int">
+		select th_gui_num
+		from travel_history
+		where th_scb_num=#{scb_num} 
+	</select>
+	<delete id="delete" parameterType="hashmap">
+		delete from travel_history
+		where th_case='N' and th_scb_num=#{scb_num} 
+		and th_req_num=#{requestNum} 
+		and th_gui_num=#{guiderNum}
+	</delete>
+	<update id="confirm" parameterType="hashmap">
+		update travel_history
+		set th_case='Y'
+		where th_scb_num=#{scb_num} 
+		and th_req_num=#{requestNum} 
+		and th_gui_num=#{guiderNum}
+		
+	</update>
+</mapper>

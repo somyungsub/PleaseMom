@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="member">
+	<insert id="addMember" parameterType="MemberDTO">
+		insert into member(mem_num, mem_id, mem_passwd, mem_name, mem_birth, mem_picture)
+		values (mem_seq.nextval,#{mem_id},CryptIT.encrypt(#{mem_passwd}, 'oramaster'),#{mem_name},#{mem_birth}, 'img/images.png')
+	</insert>
+	
+	<select id="login" parameterType="hashmap" resultType="MemberDTO">
+		select mem_num, mem_id, mem_name, mem_birth,
+		mem_phone,mem_birth,mem_case,mem_picture,mem_email_ck,mem_phone_ck
+		from member
+		where mem_id = #{mem_id} and CRYPTIT.DECRYPT(mem_passwd, 'oramaster') = #{mem_passwd}
+	</select>
+	
+	<select id="catchProfile" parameterType="string" resultType="MemberDTO">
+		select mem_num ,mem_id, mem_name, to_char(mem_birth,'yyyy-mm-dd') mem_birth, mem_phone, mem_picture, mem_email_ck, mem_phone_ck, mem_case
+		from member
+		where mem_id = #{id}
+	</select>
+	
+	<update id="updateMember" parameterType="MemberDTO">
+		update member
+		set mem_passwd = CryptIT.encrypt(#{passwd}, 'oramaster'),
+		mem_phone = #{phone},
+		mem_name = #{username}
+	   where mem_id = #{userid}	
+	</update>
+	
+	
+	<update id="authenEmail" parameterType="string">
+		update member
+		set mem_email_ck = 'Y'
+	   where mem_id = #{userid}	
+	</update>
+	
+	<delete id="deleteMember" parameterType="string">
+		delete member
+		where mem_id = #{userid}
+	</delete>
+	
+	<select id="boardSearch" parameterType="int" resultType="MemberDTO">
+		select mem_num, mem_id, mem_name, mem_birth,
+		mem_phone,mem_birth,mem_case,mem_picture,mem_email_ck,mem_phone_ck
+		from member, schedule_board
+		where member.mem_num=schedule_board.scb_mem_num
+		and scb_num=#{scb_num}
+	</select>
+	
+	<update id="tempPasswd" parameterType="hashmap">
+		update member
+		set mem_passwd = CryptIT.encrypt('#{passwd}', 'oramaster')
+		where mem_id = #{userid}
+	</update>
+	
+	<select id="selectMember" parameterType="int" resultType="MemberDTO">
+		select mem_num, mem_id, mem_name, mem_birth,
+		mem_phone,mem_birth,mem_case,mem_picture,mem_email_ck,mem_phone_ck
+		from member
+		where mem_num=#{mem_num}
+	</select>
+	
+	<update id="updateCancelCase" parameterType="int">
+		update member
+		set mem_case='CANCEL'
+		where mem_num=#{mem_num}
+	</update>
+	
+	<update id="updateConfirmCase" parameterType="int">
+		update member
+		set mem_case='CONFIRM'
+		where mem_num=#{mem_num}
+	</update>
+	
+	<update id="updateDuringCase" parameterType="int">
+		update member
+		set mem_case='DURING'
+		where mem_num=#{mem_num}
+	</update>
+	
+	<select id="findByPhone" parameterType="string" resultType="string">
+		select mem_phone
+		from member
+		where mem_phone = #{phone}
+	</select>
+	
+	<update id="updatePhoneNumber" parameterType="MemberDTO">
+		update member
+		set mem_phone = #{mem_phone}, mem_phone_ck = 'Y'
+		where mem_num = #{mem_num}
+	</update>
+</mapper>

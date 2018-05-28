@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="review">
+	<!-- 내가 쓴 리뷰 리스트 -->
+	<resultMap type="MemberDTO" id="reqMemberResult">
+		<id column="review_req_num" property="mem_num"/>
+		<result column="mem_picture" property="mem_picture"/>
+		<result column="mem_name" property="mem_name"/>
+	</resultMap>
+	
+	<resultMap type="MemberDTO" id="guiMemberResult">
+		<id column="review_gui_num" property="mem_num"/>
+		<result column="g_pic" property="mem_picture"/>
+		<result column="g_name" property="mem_name"/>
+	</resultMap>
+	
+	<resultMap type="BoardDTO" id="boardResult">
+		<id column="scb_num" property="scb_num"/>
+		<result column="scb_from" property="scb_from"/>
+		<result column="scb_via" property="scb_via"/>
+		<result column="scb_to" property="scb_to"/>
+	</resultMap>
+	
+	<resultMap type="ReviewDTO" id="reviewResult">
+		<id column="review_num" property="review_num"/>
+		<result column="review_content" property="review_content"/>
+		<result column="review_star" property="review_star"/>
+		<result column="review_wdate" property="review_wdate"/>
+		<association property="reqMemDto" resultMap="reqMemberResult"/>	<!-- 1:1에서만 사용함 -->
+		<association property="guiMemDto" resultMap="guiMemberResult"/>
+		<association property="boardDto" resultMap="boardResult"/>
+	</resultMap>
+	
+	<select id="reqReviewList" parameterType="int" resultMap="reviewResult">
+		select review_num, review_content, review_req_num, review_gui_num, review_star, to_char(review_wdate, 'yyyy-mm-dd hh24:mm') review_wdate, r.mem_name, r.mem_picture, g.mem_name g_name, g.mem_picture g_pic, scb_from, scb_via, scb_to
+		from review, member r, member g, schedule_board
+		where r.mem_num = review_req_num and g.mem_num = review_gui_num
+			and review_scb_num = scb_num and review_req_num = #{mem_num}
+	</select>
+	
+	<select id="guiReviewList" parameterType="int" resultMap="reviewResult">
+		select review_num, review_content, review_req_num, review_gui_num, review_star, to_char(review_wdate, 'yyyy-mm-dd hh24:mm') review_wdate, r.mem_name, r.mem_picture, g.mem_name g_name, g.mem_picture g_pic, scb_from, scb_via, scb_to
+		from review, member r, member g, schedule_board
+		where r.mem_num = review_req_num and g.mem_num = review_gui_num 
+			and review_scb_num = scb_num and review_gui_num = #{mem_num}
+	</select>
+	
+	<select id="airportList" parameterType="list" resultType="string">
+		select name_kr from airport_info 
+		<where>
+		airport_num in
+			<foreach collection="list" item="airport_num" open="(" close=")" separator=",">
+				#{airport_num}
+			</foreach>
+		</where> 
+	</select>
+	
+	<insert id="writeReview" parameterType="ReviewDTO">
+		insert into review(review_num, review_content, review_req_num, review_gui_num, review_scb_num, review_star, review_wdate)
+		values(review_seq.nextval, #{review_content}, #{reqMemDto.mem_num}, ${guiMemDto.mem_num}, #{boardDto.scb_num}, #{review_star}, sysdate)
+	</insert>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+

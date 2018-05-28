@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="airport">
+	<select id="search" parameterType="string" resultType="AirportInfoDTO">
+		select airport_num, name_kr, country_kr, city_kr
+		from airport_info
+		where rownum &lt;= 5
+		and name_kr like '%'||#{name}||'%'
+		or name_en like '%'||#{name}||'%'
+	</select>
+	<select id="nationSearch" parameterType="string" resultType="AirportInfoDTO">
+		select distinct country_kr, location
+		from airport_info
+		where rownum &lt;= 5
+		and country_kr like '%'||#{name}||'%'
+		 or country_en like '%'||#{name}||'%'
+	</select>
+	<select id="airportNum" parameterType="string" resultType="string">
+		select airport_num
+		from airport_info
+		where name_kr=#{name}
+	</select>
+	<select id="searchCountry" parameterType="string" resultType="string">
+		select country_kr
+		from airport_info
+		where name_kr=#{airName}
+	</select>
+</mapper>

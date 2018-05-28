@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+	
+	<!-- /////////////////////////////////////////////////////////////// -->
+	<!-- DB 연동 코드 -->
+	<!-- jdbc.properties 설정 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+	<context:annotation-config />
+	<!-- dataSource 등록 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.userid}" />
+		<property name="password" value="${jdbc.passwd}" />
+	</bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" >
+			<list>
+				<value>classpath:AirportInfoMapper.xml</value>
+				<value>classpath:BoardMapper.xml</value>
+				<value>classpath:MemberMapper.xml</value>
+				<value>classpath:ReviewMapper.xml</value>
+				<value>classpath:TravelHistoryMapper.xml</value>
+			</list>
+		</property>
+		<property name="typeAliases">
+			<list>
+				<value>com.dto.AirportInfoDTO</value>
+				<value>com.dto.BoardDTO</value>
+				<value>com.dto.MemberDTO</value>
+				<value>com.dto.PageDTO</value>
+				<value>com.dto.ReviewDTO</value>
+				<value>com.dto.TravelHistoryDTO</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	<!-- /////////////////////////////////////////////////////////////// -->
+		
+</beans>

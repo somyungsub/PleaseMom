@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="myboard">
+	
+	<select id="mediateBoardArrival" parameterType="list" resultType="string">
+		select name_kr from AIRPORT_INFO, SCHEDULE_BOARD
+		<where>
+			scb_num in 
+			<foreach collection="list" open="(" close=")" separator="," item="boardList">
+				#{boardList.scb_num}
+			</foreach>
+		</where>
+	   	and AIRPORT_INFO.AIRPORT_NUM=SCHEDULE_BOARD.SCB_TO
+	   	order by scb_case desc, scb_num desc
+	</select>
+
+	<select id="mediateBoardStart" parameterType="list" resultType="string">
+		select name_kr from AIRPORT_INFO, SCHEDULE_BOARD
+		<where>
+			scb_num in
+			<foreach collection="list" open="(" close=")" separator="," item="boardList">
+				#{boardList.scb_num}
+			</foreach>
+		</where>
+	   	and AIRPORT_INFO.AIRPORT_NUM=SCHEDULE_BOARD.SCB_FROM
+	   	order by scb_case desc, scb_num desc
+	</select>
+	
+	
+	<select id="mediateBoardList" parameterType="list" resultType="BoardDTO">
+		select * from schedule_board
+		<where>
+			scb_num in
+			<foreach collection="list" open="(" close=")" separator="," item="numList">
+				#{numList}
+			</foreach>
+		</where>
+		order by scb_case desc, scb_num desc
+	</select>
+
+	<select id="boardUpdateRetrieve" parameterType="int" resultType="BoardDTO">
+		select scb_num, scb_mem_num, scb_from,scb_via,scb_to, scb_sdate,scb_title, scb_content,scb_wdate,scb_case,scb_mediate
+		from schedule_board
+		where scb_num=#{scb_num} 
+	</select>
+	
+	
+	<update id="updateBoardCase" parameterType="int">
+			update schedule_board
+			set scb_case='DURING'
+			where scb_num=#{boardNum}
+	</update>
+
+ <delete id="delete" parameterType="int">
+    delete from schedule_board
+     where scb_num = #{scb_num}
+ </delete>
+
+ <update id="update" parameterType="BoardDTO">
+      update schedule_board 
+      set scb_title=#{scb_title}, 
+          scb_from=#{scb_from}, 
+          scb_via=#{scb_via},
+          scb_to=#{scb_to},
+          scb_sdate=#{scb_sdate},
+          scb_content=#{scb_content}
+      where scb_num = #{scb_num}
+    </update>
+
+    <insert id="write" parameterType="BoardDTO">
+     insert into schedule_board(scb_num,scb_mem_num, scb_from,scb_via,scb_to,scb_sdate,scb_title,scb_content)
+     values ( scb_seq.nextval, #{scb_mem_num},#{scb_from},#{scb_via},#{scb_to},to_date(#{scb_sdate},'YYYY-MM-DD:HH24:MI'),#{scb_title},#{scb_content}) 
+    </insert>
+
+
+	<select id="list" resultType="BoardDTO" parameterType="hashmap">
+	   select scb_num, scb_mem_num, scb_from,scb_via,scb_to,
+	         scb_sdate,scb_title,
+	         scb_content,scb_wdate,scb_case
+		from schedule_board
+		where scb_from=(select airport_num from AIRPORT_INFO where name_kr=#{scb_from})
+		and scb_to in (select airport_num from AIRPORT_INFO where COUNTRY_KR=#{scb_to})
+	   	and scb_sdate between to_date(#{min},'YYYY-MM-DD:HH24:MI') and to_date(#{max},'YYYY-MM-DD:HH24:MI')
+	   	order by scb_num desc      
+	</select>
+	
+	<select id="listAirportStart" parameterType="hashmap" resultType="string">
+		select name_kr from AIRPORT_INFO, SCHEDULE_BOARD
+		where scb_from=(select airport_num from AIRPORT_INFO where name_kr=#{scb_from})
+	   	and AIRPORT_INFO.AIRPORT_NUM=SCHEDULE_BOARD.SCB_FROM
+	   	and scb_sdate between to_date(#{min},'YYYY-MM-DD:HH24:MI') and to_date(#{max},'YYYY-MM-DD:HH24:MI')
+	   	order by scb_num desc
+	</select>
+
+	<select id="listAirportArrival" parameterType="hashmap" resultType="string">
+		select name_kr from AIRPORT_INFO, SCHEDULE_BOARD
+		where scb_from=(select airport_num from AIRPORT_INFO where name_kr=#{scb_from})
+		and scb_to in (select airport_num from AIRPORT_INFO where COUNTRY_KR=#{scb_to})
+	   	and AIRPORT_INFO.AIRPORT_NUM=SCHEDULE_BOARD.SCB_to
+	   	and scb_sdate between to_date(#{min},'YYYY-MM-DD:HH24:MI') and to_date(#{max},'YYYY-MM-DD:HH24:MI')
+	   	order by scb_num desc     
+	</select>
+	
+	<select id="totalCount" resultType="int" parameterType="hashmap">
+	 select count(*) 
+	 from schedule_board
+	 where scb_from=(select airport_num from AIRPORT_INFO where name_kr=#{scb_from})
+	 and scb_to in (select airport_num from AIRPORT_INFO where COUNTRY_KR=#{scb_to})
+	 and scb_sdate between to_date(#{min},'YYYY-MM-DD:HH24:MI') and to_date(#{max},'YYYY-MM-DD:HH24:MI')
+	</select>
+	
+	<select id="totalCountImgSearch" resultType="int" parameterType="string">
+	 select count(*) 
+	 from schedule_board
+	 where scb_from in (select airport_num from AIRPORT_INFO where COUNTRY_KR='대한민국')
+	 and scb_to in (select airport_num from AIRPORT_INFO where COUNTRY_KR=#{scb_to})
+	 and scb_sdate between to_date(sysdate,'YYYY-MM-DD:HH24:MI') and to_date('9999-12-31:23:59','YYYY-MM-DD:HH24:MI')
+	</select>
+
+    <select id="retrieve" 
+       parameterType="int" resultType="BoardDTO">
+       select scb_num, scb_from, scb_via, scb_to,scb_case, scb_title,scb_content,scb_sdate, scb_mem_num,scb_mediate
+	   from  schedule_board
+	   where scb_num = #{scb_num}
+     </select>
+	
+	
+	<select id="retrieveAirportStart" parameterType="BoardDTO" resultType="string">
+		select name_kr
+		from AIRPORT_INFO
+		where airport_num=#{scb_from}
+	</select>
+	<select id="retrieveAirportArrival" parameterType="BoardDTO" resultType="string">
+		select name_kr
+		from AIRPORT_INFO
+		where airport_num=#{scb_to}    
+	</select>
+	
+	<update id="updateCase" parameterType="hashmap">
+		update schedule_board
+		set scb_case=#{caseBoard}
+		where scb_num=#{scb_num} 
+	</update>
+	<update id="mediateApproval" parameterType="hashmap">
+		update schedule_board
+		set scb_mediate=#{approval}
+		where scb_num=#{scb_num} 
+	</update>
+	
+	<select id="mediateCaseSelect" parameterType="int" resultType="string">
+		select scb_mediate
+		from schedule_board
+		where scb_num=#{scb_num}
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
